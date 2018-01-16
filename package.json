@@ -1,0 +1,28 @@
+{
+  "name": "ico-busses",
+  "version": "1.0.0",
+  "description": "Mass transit to ICOs",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adibas03/ico-busses.git"
+  },
+  "keywords": [
+    "ico",
+    "ethereum",
+    "gasprice",
+    "latency"
+  ],
+  "author": "adibas03@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adibas03/ico-busses/issues"
+  },
+  "homepage": "https://github.com/adibas03/ico-busses#readme"
+}
