@@ -1,5 +1,5 @@
 import './SafeMath.sol';
-import './TimedOwnable.sol';
+import './base_contracts/TimedOwnable.sol';
 import './WithFullDevilUpgradeableInterface.sol';
 import {BasicToken as BERC20} from './BasicToken.sol';
 
