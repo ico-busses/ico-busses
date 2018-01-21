@@ -1,4 +1,4 @@
-import './Ownable.sol';
+import '../base_contracts/Ownable.sol';
 
 pragma solidity^0.4.18;
 
