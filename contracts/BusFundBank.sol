@@ -1,9 +1,9 @@
-import './WithUpgradeableInterface.sol';
+import './WithFullDevilUpgradeableInterface.sol';
 import './SafeMath.sol';
 
 pragma solidity^0.4.18;
 
-contract BusFundBank is TimedOwnable,WithDevilUpgradeableInterface{
+contract BusFundBank is TimedOwnable,WithFullDevilUpgradeableInterface{
   using SafeMath for uint;
 
   uint256 feesBalance;
@@ -14,7 +14,7 @@ contract BusFundBank is TimedOwnable,WithDevilUpgradeableInterface{
 
   }
 
-  function getTokenBalance( address _token) public pure constant returns(uint256)
+  function getTokenBalance( address _token) public pure returns(uint256){
     return ERC20(_token).balanceOf(this);
   }
 
@@ -25,13 +25,13 @@ contract BusFundBank is TimedOwnable,WithDevilUpgradeableInterface{
 
   function sendBatchTokens(address _token, address[20] _addresses, uint256[20] _values ) public onlyInterface isInterfaceSet {
     for(uint256  t=0; t<_addresses.length; t++){
-      if(_addresses[t] !== 0x0 && _values[t] > 0)
+      if(_addresses[t] != 0x0 && _values[t] > 0)
         sendTokens(_token,_addresses[t],_values[t]);
     }
   }
 
   function sendEther(address _to,uint256 _value) public onlyInterface isInterfaceSet {
-    require(_to !== 0x0);
+    require(_to != 0x0);
     require(_value > 0);
     EtherTransfer(_to,_value);
     _to.transfer(_value);
