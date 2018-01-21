@@ -11,7 +11,8 @@ contract('BusFundBank', function(accounts){
     },
     newBusFundBank = function(){
       return BusFundBank.new(
-          deployment_config._interface
+          deployment_config._interface,
+          {from:Me}
       );
     };
 
@@ -28,9 +29,6 @@ contract('BusFundBank', function(accounts){
 
 
             console.log('Address:',contract.address );
-            contract.name(function(e,r){
-                console.log('Name:', r);
-              });
             contract.owner(function(e,r){
                 console.log('Owner:', r);
               });
