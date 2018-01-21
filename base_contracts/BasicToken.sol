@@ -12,6 +12,9 @@ import './SafeMath.sol';
 contract BasicToken is ERC20Basic {
   using SafeMath for uint256;
 
+  string public name;
+  string public symbol;
+  uint256 public decimals = 18;
   mapping(address => uint256) balances;
 
   /**
