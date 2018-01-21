@@ -9,6 +9,7 @@ contract TimedOwnable is Ownable{
   event transferOwnershipRequested( address newOwner, uint256 timestamp);
 
   function transferOwnership(address newOwner) onlyOwner public {
+    require(transferOwnerInitiated == 0);
     transferOwnerInitiated = block.timestamp;
     super.transferOwnership(newOwner);
   }
@@ -19,7 +20,7 @@ contract TimedOwnable is Ownable{
   }
 
   function acceptOwnership() onlyOwner public {
-    require( (now - transferOwnerInitiated) > transferOwnerWaitTime);
+    require( (now - transferOwnerInitiated) >= transferOwnerWaitTime);
     transferOwnerInitiated = 0;
     super.acceptOwnership();
   }
