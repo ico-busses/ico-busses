@@ -1,7 +1,7 @@
 import './SafeMath.sol';
 import './TimedOwnable.sol';
 import './WithFullDevilUpgradeableInterface.sol';
-import {StandardToken as SERC20} from './StandardToken.sol';
+import {BasicToken as BERC20} from './BasicToken.sol';
 
 pragma solidity^0.4.18;
 
@@ -15,12 +15,12 @@ contract BusFundBank is TimedOwnable,WithFullDevilUpgradeableInterface{
   function BusFundBank(address _interface) WithFullDevilUpgradeableInterface(_interface) public {}
 
   function getTokenBalance( address _token) public constant returns(uint256){
-    return SERC20(_token).balanceOf(this);
+    return BERC20(_token).balanceOf(this);
   }
 
   function sendTokens(address _token,  address _to,uint256 _value) public onlyInterface isInterfaceSet {
     require( getTokenBalance(_token) >= _value );
-    SERC20(_token).transfer(_to,_value);
+    BERC20(_token).transfer(_to,_value);
   }
 
   function sendBatchTokens(address _token, address[20] _addresses, uint256[20] _values ) public onlyInterface isInterfaceSet {
