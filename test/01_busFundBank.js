@@ -41,6 +41,77 @@ contract('BusFundBank', function(accounts){
         });
     });
 
+    describe('Ownership Features',function(){
+
+      it('Should begin transfer Ownership process', function(done){
+        contract.transferOwnership(accounts[1],{from:Me},function(e,r){
+          var newOwner = contract.newOwner.call(function(_e,_r){
+          assert.equal(_r,accounts[1],'Unable to begin transfer Ownership process');
+          done();
+          })
+        })
+      })
+
+      it('Should fail to acceptOwnership before wait TIme elapsed', function(done){
+        contract.acceptOwnership({from:accounts[1]},function(e,r){
+          web3.eth.getBlock('latest',function(be,br){
+            contract.transferOwnerInitiated.call(function(ie,ir){
+              contract.transferOwnerWaitTime.call(function(we,wr){
+                console.log('Time', br.timestamp);
+                console.log('TransferInitiated',Number(ir) );
+                console.log('WaitTime',Number(wr) );
+                assert.equal( Number(ir.plus(wr)) > br.timestamp, true, 'Wait time already Exceeded');
+                assert.notEqual(e, null, 'Accept Ownership completed before wait Time exceedded');
+                done();
+              })
+            })
+          })
+        })
+      })
+
+      it('should fail to reject ownershipTransfer from rogue Account', function(done){
+        contract.rejectTransferOwnership({from:accounts[1]},function(e,r){
+            assert.notEqual(e,null,'Rogue Address successfully rejected ownership');
+            done();
+        })
+      })
+
+      it('should reject ownershipTransfer', function(done){
+        contract.rejectTransferOwnership({from:Me},function(e,r){
+            assert.notEqual(r,null,'Unable to reject Ownership transfer');
+            done();
+        })
+      })
+
+
+      it('should fail to accept ownershipTransfer from rogue Account', function(done){
+        forceMine(1800);//Moce time forward by 30 minutes
+        contract.acceptOwnership({from:accounts[2]},function(e,r){
+            assert.notEqual(e,null,'Rogue Address successfully accepted ownership');
+            done();
+        })
+      })
+
+      it('Should acceptOwnership ', function(done){
+        contract.acceptOwnership({from:accounts[1]},function(e,r){
+          web3.eth.getBlock('latest',function(be,br){
+            contract.transferOwnerInitiated.call(function(ie,ir){
+              contract.transferOwnerWaitTime.call(function(we,wr){
+                console.log('Time', br.timestamp);
+                console.log('TransferInitiated',Number(ir) );
+                console.log('WaitTime',Number(wr) );
+                assert.equal( Number(ir.plus(wr)) <= br.timestamp, true, 'Wait time not yet attained');
+                assert.equal(e, null, 'Accept Ownership unable to be completed by receiving address');
+                done();
+              })
+            })
+          })
+        })
+      })
+
+
+    })
+
     describe.skip('Loan Activation',function(){
 
         it('Should fail to send wrong amount to the contract from non-lender',function(done){
