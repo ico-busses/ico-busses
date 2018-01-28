@@ -1,7 +1,7 @@
 //var BusFundBank = artifacts.require('./BusFundBank.sol');// Import contract of StandarTOken type
 var BusFundBank = artifacts.require('./TimedOwnable.sol');// Import contract of StandarTOken type
 
-contract('BusFundBank', function(accounts){
+contract('02_BusFundBank', function(accounts){
 
     var contract,newcontract,web3,Me;
     const _1ether = 1e+18;
