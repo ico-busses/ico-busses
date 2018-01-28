@@ -1,17 +1,21 @@
-var BusFundBank = artifacts.require('./BusFundBank.sol');// Import contract of StandarTOken type
+//var BusFundBank = artifacts.require('./BusFundBank.sol');// Import contract of StandarTOken type
+var BusFundBank = artifacts.require('./TimedOwnable.sol');// Import contract of StandarTOken type
 
 contract('BusFundBank', function(accounts){
 
     var contract,newcontract,web3,Me;
     const _1ether = 1e+18;
     Me = accounts[0];
+    coFounder = accounts[2];
+    console.log(accounts);
 
     var deployment_config = {
       _interface:0
     },
     newBusFundBank = function(){
       return BusFundBank.new(
-          deployment_config._interface,
+          coFounder,
+          //deployment_config._interface,
           {from:Me}
       );
     };
@@ -32,85 +36,14 @@ contract('BusFundBank', function(accounts){
             contract.owner(function(e,r){
                 console.log('Owner:', r);
               });
-            contract.interfaceAddress(function(e,r){
+            /*contract.interfaceAddress(function(e,r){
                 console.log('interfaceAddress:', r);
-              });
+              });*/
 
             assert.notEqual(contract.address, null, 'Contract not successfully deployed');
             done();
         });
     });
-
-    describe('Ownership Features',function(){
-
-      it('Should begin transfer Ownership process', function(done){
-        contract.transferOwnership(accounts[1],{from:Me},function(e,r){
-          var newOwner = contract.newOwner.call(function(_e,_r){
-          assert.equal(_r,accounts[1],'Unable to begin transfer Ownership process');
-          done();
-          })
-        })
-      })
-
-      it('Should fail to acceptOwnership before wait TIme elapsed', function(done){
-        contract.acceptOwnership({from:accounts[1]},function(e,r){
-          web3.eth.getBlock('latest',function(be,br){
-            contract.transferOwnerInitiated.call(function(ie,ir){
-              contract.transferOwnerWaitTime.call(function(we,wr){
-                console.log('Time', br.timestamp);
-                console.log('TransferInitiated',Number(ir) );
-                console.log('WaitTime',Number(wr) );
-                assert.equal( Number(ir.plus(wr)) > br.timestamp, true, 'Wait time already Exceeded');
-                assert.notEqual(e, null, 'Accept Ownership completed before wait Time exceedded');
-                done();
-              })
-            })
-          })
-        })
-      })
-
-      it('should fail to reject ownershipTransfer from rogue Account', function(done){
-        contract.rejectTransferOwnership({from:accounts[1]},function(e,r){
-            assert.notEqual(e,null,'Rogue Address successfully rejected ownership');
-            done();
-        })
-      })
-
-      it('should reject ownershipTransfer', function(done){
-        contract.rejectTransferOwnership({from:Me},function(e,r){
-            assert.notEqual(r,null,'Unable to reject Ownership transfer');
-            done();
-        })
-      })
-
-
-      it('should fail to accept ownershipTransfer from rogue Account', function(done){
-        forceMine(1800);//Moce time forward by 30 minutes
-        contract.acceptOwnership({from:accounts[2]},function(e,r){
-            assert.notEqual(e,null,'Rogue Address successfully accepted ownership');
-            done();
-        })
-      })
-
-      it('Should acceptOwnership ', function(done){
-        contract.acceptOwnership({from:accounts[1]},function(e,r){
-          web3.eth.getBlock('latest',function(be,br){
-            contract.transferOwnerInitiated.call(function(ie,ir){
-              contract.transferOwnerWaitTime.call(function(we,wr){
-                console.log('Time', br.timestamp);
-                console.log('TransferInitiated',Number(ir) );
-                console.log('WaitTime',Number(wr) );
-                assert.equal( Number(ir.plus(wr)) <= br.timestamp, true, 'Wait time not yet attained');
-                assert.equal(e, null, 'Accept Ownership unable to be completed by receiving address');
-                done();
-              })
-            })
-          })
-        })
-      })
-
-
-    })
 
     describe.skip('Loan Activation',function(){
 
