@@ -1,7 +1,6 @@
-//var BusFundBank = artifacts.require('./BusFundBank.sol');// Import contract of StandarTOken type
-var BusFundBank = artifacts.require('./TimedOwnable.sol');// Import contract of StandarTOken type
+var BusFundBank = artifacts.require('./BusFundBank.sol');// Import contract of StandarTOken type
 
-contract('02_BusFundBank', function(accounts){
+contract('03_BusFundBank', function(accounts){
 
     var contract,newcontract,web3,Me;
     const _1ether = 1e+18;
@@ -15,7 +14,7 @@ contract('02_BusFundBank', function(accounts){
     newBusFundBank = function(){
       return BusFundBank.new(
           coFounder,
-          //deployment_config._interface,
+          deployment_config._interface,
           {from:Me}
       );
     };
@@ -31,20 +30,20 @@ contract('02_BusFundBank', function(accounts){
             contract = inst.contract;
             web3 = inst.constructor.web3;
 
-
             console.log('Address:',contract.address );
+
+
             contract.owner(function(e,r){
-                console.log('Owner:', r);
-              });
-            /*contract.interfaceAddress(function(e,r){
-                console.log('interfaceAddress:', r);
-              });*/
+              console.log('Owner:', r);
+            });
+            contract.interfaceAddress(function(e,r){
+              console.log('interfaceAddress:', r);
+            });
 
             assert.notEqual(contract.address, null, 'Contract not successfully deployed');
             done();
         });
     });
-
     describe.skip('Loan Activation',function(){
 
         it('Should fail to send wrong amount to the contract from non-lender',function(done){

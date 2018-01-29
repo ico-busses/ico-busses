@@ -7,7 +7,6 @@ contract('01_TimedOwnable', function(accounts){
     Me = accounts[0];
     newOwner = accounts[1];
     coFounder = accounts[2];
-    console.log(accounts);
 
     var deployment_config = {
       _interface:0
