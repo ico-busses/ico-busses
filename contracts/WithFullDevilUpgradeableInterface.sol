@@ -7,8 +7,8 @@ contract WithFullDevilUpgradeableInterface is Ownable {
     address public interfaceAddress;
     address public newInterfaceAddress;
     bool public interfaceSet;
-    uint256 public changeInterfaceCost = 0.12345 ether;
-    uint256 public rejectInterfaceCost = 0.34567 ether;
+    uint256 public changeInterfaceCost = 0.012345 ether;
+    uint256 public rejectInterfaceCost = 0.034567 ether;
     uint256 public timeSetInterfaceRequested = 0;
     uint256 public confirmInterfaceWaitTime = 30 minutes;
 

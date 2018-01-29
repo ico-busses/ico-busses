@@ -4,8 +4,8 @@ pragma solidity^0.4.18;
 
 contract WithDevilUpgradeableInterface is WithTimedUpgradeableInterface{
 
-    uint256 public changeInterfaceCost = 0.12345 ether;
-    uint256 public rejectInterfaceCost = 0.34567 ether;
+    uint256 public changeInterfaceCost = 0.012345 ether;
+    uint256 public rejectInterfaceCost = 0.034567 ether;
 
     function WithDevilUpgradeableInterface(address _interface) WithTimedUpgradeableInterface(_interface) public {}
 
