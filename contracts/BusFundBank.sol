@@ -5,14 +5,13 @@ import {ForeignToken as FERC20} from '../base_contracts/ForeignToken.sol';
 
 pragma solidity^0.4.18;
 
-contract BusFundBank is TimedOwnable,WithFullDevilUpgradeableInterface{
+contract BusFundBank is WithFullDevilUpgradeableInterface{
   using SafeMath for uint;
 
   uint256 feesBalance;
-
   event EtherTransfer(address to,uint256 amount);
 
-  function BusFundBank(address _interface) WithFullDevilUpgradeableInterface(_interface) public {}
+  function BusFundBank(address _coFounder, address _interface) WithFullDevilUpgradeableInterface(_interface) TimedOwnable(_coFounder) public {}
 
   function getTokenBalance( address _token) public constant returns(uint256){
     return FERC20(_token).balanceOf(this);

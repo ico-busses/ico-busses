@@ -1,8 +1,8 @@
-import '../base_contracts/Ownable.sol';
+import '../base_contracts/TimedOwnable.sol';
 
 pragma solidity^0.4.18;
 
-contract WithFullDevilUpgradeableInterface is Ownable {
+contract WithFullDevilUpgradeableInterface is TimedOwnable {
 
     address public interfaceAddress;
     address public newInterfaceAddress;
@@ -15,7 +15,7 @@ contract WithFullDevilUpgradeableInterface is Ownable {
     event InterfaceSet(address previous, address present,uint256 blocktime);
     event setInterfaceRequested(address newAddress, uint256 blocktime);
 
-    function WithFullDevilUpgradeableInterface(address _interface) public {
+    function WithFullDevilUpgradeableInterface(address _coFounder,address _interface) TimedOwnable(_coFounder) public {
       interfaceAddress = _interface;
       interfaceSet = true;
       InterfaceSet(0, _interface,block.timestamp);
