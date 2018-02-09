@@ -1,7 +1,7 @@
 import '../base_contracts/SafeMath.sol';
 import '../base_contracts/TimedOwnable.sol';
-import './WithFullDevilUpgradeableInterface.sol';
-import {ForeignToken as FERC20} from '../base_contracts/ForeignToken.sol';
+import './base_contracts/WithDevilUpgradeableInterface.sol';
+import {ForeignToken as FERC20} from '../interfaces/ForeignToken.sol';
 
 pragma solidity^0.4.18;
 
