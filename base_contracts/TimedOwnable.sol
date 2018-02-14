@@ -9,7 +9,7 @@ contract TimedOwnable is Ownable{
   uint256 public transferOwnerWaitTime = 30 minutes;
   event transferOwnershipRequested( address newOwner, uint256 timestamp);
 
-  function TimedOwnable(address _coFounder) Ownable(){
+  function TimedOwnable(address _coFounder) public Ownable(){
     require(_coFounder != 0x0);
     coFounder = _coFounder;
   }
