@@ -1,4 +1,4 @@
-import './WithFullDevilUpgradeableInterface.sol';
+import '../base_contracts/WithFullDevilUpgradeableInterface.sol';
 import {BasicToken as BERC20} from '../base_contracts/BasicToken.sol';
 
 pragma solidity^0.4.18;

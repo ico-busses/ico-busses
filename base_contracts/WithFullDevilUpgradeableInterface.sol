@@ -1,4 +1,4 @@
-import '../base_contracts/TimedOwnable.sol';
+import './TimedOwnable.sol';
 
 pragma solidity^0.4.18;
 

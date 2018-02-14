@@ -1,6 +1,6 @@
-import '../base_contracts/SafeMath.sol';
+import '../libraries/SafeMath.sol';
 import '../base_contracts/TimedOwnable.sol';
-import './base_contracts/WithDevilUpgradeableInterface.sol';
+import '../base_contracts/WithFullDevilUpgradeableInterface.sol';
 import {ForeignToken as FERC20} from '../interfaces/ForeignToken.sol';
 
 pragma solidity^0.4.18;
@@ -11,7 +11,7 @@ contract BusFundBank is WithFullDevilUpgradeableInterface{
   uint256 feesBalance;
   event EtherTransfer(address to,uint256 amount);
 
-  function BusFundBank(address _coFounder, address _interface) WithFullDevilUpgradeableInterface(_interface) TimedOwnable(_coFounder) public {}
+  function BusFundBank(address _coFounder, address _interface) WithFullDevilUpgradeableInterface(_coFounder,_interface) public {}
 
   function getTokenBalance( address _token) public constant returns(uint256){
     return FERC20(_token).balanceOf(this);
