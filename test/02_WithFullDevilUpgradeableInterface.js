@@ -1,6 +1,6 @@
-var WithDevilUpgradeableInterface = artifacts.require('./WithFullDevilUpgradeableInterface.sol');// Import contract of StandarTOken type
+var WithFullDevilUpgradeableInterface = artifacts.require('./WithFullDevilUpgradeableInterface.sol');// Import contract of StandarTOken type
 
-contract('02_WithDevilUpgradeableInterface', function(accounts){
+contract('02_WithFullDevilUpgradeableInterface', function(accounts){
 
     var contract,newcontract,web3,Me;
     const _1ether = 1e+18;
@@ -11,8 +11,9 @@ contract('02_WithDevilUpgradeableInterface', function(accounts){
     var deployment_config = {
       _interface:0
     },
-    newWithDevilUpgradeableInterface = function(){
-      return WithDevilUpgradeableInterface.new(
+    newWithFullDevilUpgradeableInterface = function(){
+      return WithFullDevilUpgradeableInterface.new(
+          coFounder,
           deployment_config._interface,
           {from:Me}
       );
@@ -24,7 +25,7 @@ contract('02_WithDevilUpgradeableInterface', function(accounts){
     }
 
     it('should deploy the contract', function (done) {
-        newWithDevilUpgradeableInterface()
+        newWithFullDevilUpgradeableInterface()
         .then(function(inst){
             contract = inst.contract;
             web3 = inst.constructor.web3;
@@ -73,6 +74,34 @@ contract('02_WithDevilUpgradeableInterface', function(accounts){
 
             contract.setInterface(newInterface,{from:Me,value:_value},function(e,r){
               assert.equal(e,null,'unable to initiate setInterface process');
+              done();
+            });
+          })
+        });
+
+        it('Should fail to confirmInterface process',function(done){
+          let _value;
+          contract.changeInterfaceCost.call(function(e,r){
+            assert.equal(e,null,'Unable to fetch interface Cost');
+            _value = r;
+
+            contract.confirmSetInterface({from:newInterface,value:_value},function(e,r){
+              assert.notEqual(e,null,'seInterface confirmed before confirmation wait time exhausted');
+              done();
+            });
+          })
+        });
+
+        it('Should rejectSetInterface',function(done){
+          let _value;
+          contract.rejectInterfaceCost.call(function(e,r){
+            assert.equal(e,null,'Unable to fetch rejectInterfaceCost');
+            _value = r;
+
+            console.log("InterfaceCost: ",Number(_value));
+
+            contract.rejectSetInterface({from:Me,value:_value},function(e,r){
+              assert.equal(e,null,'unable to rejectInterface');
               done();
             });
           })
