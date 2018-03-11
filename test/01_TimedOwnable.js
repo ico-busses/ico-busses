@@ -48,7 +48,7 @@ contract('01_TimedOwnable', function(accounts){
     describe('Ownership Features::',function(){
 
       it('Should begin transfer Ownership process', function(done){
-        contract.transferOwnership(newOwner,{from:Me},function(e,r){
+        contract.initiateTransferOwnership(newOwner,{from:Me},function(e,r){
          contract.newOwner.call(function(_e,_r){
           assert.equal(_r,newOwner,'Unable to begin transfer Ownership process');
           done();
@@ -89,10 +89,10 @@ contract('01_TimedOwnable', function(accounts){
 
 
       it('should fail to accept ownershipTransfer from rogue Account', function(done){
-        contract.transferOwnership(accounts[1],{from:Me},function(e,r){
-          forceMine(1801);//Moce time forward by 30 minutes
+        contract.initiateTransferOwnership(accounts[1],{from:Me},function(e,r){
+          forceMine(1801);//Move time forward by 30 minutes
           contract.acceptOwnership({from:accounts[2]},function(e,r){
-              assert.notEqual(e,null,'Rogue Address successfully accepted ownership');
+              assert.notEqual(e,null,`Rogue Address ( ${accounts[2]} ) successfully accepted ownership instead of ${accounts[1]}`);
               done();
           })
         });
@@ -111,7 +111,7 @@ contract('01_TimedOwnable', function(accounts){
         newTimedOwnable()
         .then(function(inst){
             const contract = inst.contract;
-            contract.transferOwnership(accounts[1],{from:Me},function(e,r){
+            contract.initiateTransferOwnership(accounts[1],{from:Me},function(e,r){
               var newOwner = contract.newOwner.call(function(_e,_r){
               assert.equal(_r,accounts[1],'Unable to begin transfer Ownership process');
 
