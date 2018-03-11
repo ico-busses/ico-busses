@@ -5,11 +5,12 @@ contract('03_BusFundBank', function(accounts){
     var contract,newcontract,web3,Me;
     const _1ether = 1e+18;
     Me = accounts[0];
-    coFounder = accounts[2];
+    coFounder = accounts[1];
+    busInterface = accounts[2];
     console.log(accounts);
 
     var deployment_config = {
-      _interface:0
+      _interface:busInterface
     },
     newBusFundBank = function(){
       return BusFundBank.new(
@@ -32,7 +33,6 @@ contract('03_BusFundBank', function(accounts){
 
             console.log('Address:',contract.address );
 
-
             contract.owner(function(e,r){
               console.log('Owner:', r);
             });
@@ -44,17 +44,21 @@ contract('03_BusFundBank', function(accounts){
             done();
         });
     });
-    describe.skip('Loan Activation',function(){
+    describe('EtherTransfer',function(){
 
-        it('Should fail to send wrong amount to the contract from non-lender',function(done){
-            var _value = web3.toWei(2, 'ether');
-            web3.eth.sendTransaction({from:accounts[2],to:contract.address,value:_value},function(e,r){
-              assert.notEqual(e,null,'Wrong amount used to fund loan by non-lender');
-              done();
+        it('Should successfully send funds to the FundBank',function(done){
+            var _value = web3.toWei(1, 'ether');
+            var balance = web3.eth.getBalance(contract.address);
+            web3.eth.sendTransaction({from:Me,to:contract.address,value:_value},function(e,r){
+              assert.equal(e,null,`Unable to send ${_value/1e+18} Eth to FundBank`);
+              var newBalance = web3.eth.getBalance(contract.address);
+              var balanceChange = newBalance.minus(balance);
+                assert.equal(Number(_value),Number(balanceChange) ,`${Number(balanceChange)} funded instead of ${Number(_value)}`);
+                done();
             });
         });
 
-        it('Should fail to send right amount to the contract from non-lender',function(done){
+        it.skip('Should fail to send right amount to the contract from non-lender',function(done){
           var _value = deployment_config._initialAmount;
           web3.eth.sendTransaction({from:accounts[2],to:contract.address,value:_value},function(e,r){
             assert.notEqual(e,null,'Loan funded by non-lender');
@@ -62,7 +66,7 @@ contract('03_BusFundBank', function(accounts){
           });
         });
 
-        it('Should fail to send wrong amount to the contract from lender',function(done){
+        it.skip('Should fail to send wrong amount to the contract from lender',function(done){
           var _value = web3.toWei(2, 'ether'),
           lender = deployment_config._lender;
           web3.eth.sendTransaction({from:lender,to:contract.address,value:_value},function(e,r){
@@ -71,7 +75,7 @@ contract('03_BusFundBank', function(accounts){
           });
         });
 
-        it('Should send right amount to the contract from lender',function(done){
+        it.skip('Should send right amount to the contract from lender',function(done){
           var _lender = contract.lender.call(),
           _value = contract.getLoanValue.call(true),
           _mybal = web3.eth.getBalance(Me),
