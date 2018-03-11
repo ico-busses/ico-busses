@@ -39,20 +39,16 @@ library SafeMath {
  */
 contract Ownable {
   address public owner;
-  address public newOwner;
-
 
   event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
 
   /**
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() {
+  function Ownable() public {
     owner = msg.sender;
   }
-
 
   /**
    * @dev Throws if called by any account other than the owner.
@@ -62,125 +58,129 @@ contract Ownable {
     _;
   }
 
-
   /**
    * @dev Allows the current owner to transfer control of the contract to a newOwner.
-   * @param _newOwner The address to transfer ownership to.
+   * @param newOwner The address to transfer ownership to.
    */
-  function transferOwnership(address _newOwner) onlyOwner public {
-    require(_newOwner != address(0));
-    newOwner = _newOwner;
-  }
-
-  /**
-  * @dev Accept Ownership
-  */
-  function acceptOwnership() onlyOwner public {
-    require(newOwner == msg.sender);
+  function transferOwnership(address newOwner) internal {
+    require(newOwner != address(0));
     OwnershipTransferred(owner, newOwner);
-    newOwner = 0x0;
     owner = newOwner;
   }
-
 }
 
-contract TimedOwnable is Ownable{
+  contract TimedOwnable is Ownable{
 
-  uint256 public transferOwnerInitiated = 0;
-  uint256 public transferOwnerWaitTime = 30 minutes;
-  event transferOwnershipRequested( address newOwner, uint256 timestamp);
+    address public newOwner;
+    address public coFounder;
+    uint256 public transferOwnerInitiated = 0;
+    uint256 public transferOwnerWaitTime = 30 minutes;
+    event transferOwnershipRequested( address newOwner, uint256 timestamp);
 
-  function transferOwnership(address newOwner) onlyOwner public {
-    transferOwnerInitiated = block.timestamp;
-    super.transferOwnership(newOwner);
+    function TimedOwnable(address _coFounder) public {
+      require(_coFounder != 0x0);
+      coFounder = _coFounder;
+    }
+
+    function initiateTransferOwnership(address _newOwner) onlyOwner public {
+      require(transferOwnerInitiated == 0);
+      transferOwnerInitiated = block.timestamp;
+      transferOwnershipRequested( newOwner, transferOwnerInitiated);
+      newOwner = _newOwner;
+    }
+
+    function rejectTransferOwnership() onlyOwner public {
+      transferOwnerInitiated = 0;
+    }
+
+    function acceptOwnership() public {
+      require(newOwner == msg.sender);
+      require(transferOwnerInitiated > 0);
+      require( (now - transferOwnerInitiated) >= transferOwnerWaitTime);
+      transferOwnerInitiated = 0;
+      super.transferOwnership(newOwner);
+    }
+
+    function vetoTransferOwnership() public {
+      require(coFounder == msg.sender);
+      require(transferOwnerInitiated > 0);
+      transferOwnerInitiated = 0;
+      OwnershipTransferred(owner, newOwner);
+      owner = newOwner;
+    }
   }
 
-  function rejectTransferOwnership() onlyOwner public {
-    transferOwnerInitiated = 0;
-    newOwner = 0;
+  contract WithFullDevilUpgradeableInterface is TimedOwnable {
+
+      address public interfaceAddress;
+      address public newInterfaceAddress;
+      bool public interfaceSet;
+      uint256 public changeInterfaceCost = 0.012345 ether;
+      uint256 public rejectInterfaceCost = 0.034567 ether;
+      uint256 public timeSetInterfaceRequested = 0;
+      uint256 public confirmInterfaceWaitTime = 30 minutes;
+
+      event InterfaceSet(address previous, address present,uint256 blocktime);
+      event setInterfaceRequested(address newAddress, uint256 blocktime);
+
+      function WithFullDevilUpgradeableInterface(address _coFounder,address _interface) TimedOwnable(_coFounder) public {
+        interfaceAddress = _interface;
+        interfaceSet = true;
+        InterfaceSet(0, _interface,block.timestamp);
+      }
+
+      function setInterface(address _addr) payable public onlyOwner {
+        require(msg.value == changeInterfaceCost);
+        require(timeSetInterfaceRequested == 0);
+        assert(owner != _addr);
+        assert(interfaceAddress != _addr);
+
+        timeSetInterfaceRequested = block.timestamp;
+        newInterfaceAddress = _addr;
+        interfaceSet = false;
+
+        setInterfaceRequested(newInterfaceAddress,block.timestamp);
+      }
+
+      function confirmSetInterface() payable public onlyOwner {
+        require(msg.value == changeInterfaceCost);
+        require(timeSetInterfaceRequested != 0);
+        require( (now - timeSetInterfaceRequested) >= confirmInterfaceWaitTime);
+        require(interfaceSet == false);
+
+        address previousInterface = interfaceAddress;
+        interfaceAddress = newInterfaceAddress;
+        newInterfaceAddress = 0;
+        interfaceSet = true;
+        timeSetInterfaceRequested = 0;
+
+        InterfaceSet(previousInterface, interfaceAddress,block.timestamp);
+        owner.transfer(changeInterfaceCost);
+      }
+
+      function rejectSetInterface() payable public onlyOwner {
+        require(msg.value == rejectInterfaceCost);
+        require(timeSetInterfaceRequested != 0);
+        require(interfaceSet == false);
+
+        newInterfaceAddress = 0;
+        interfaceSet = true;
+        timeSetInterfaceRequested = 0;
+
+        owner.transfer(changeInterfaceCost);
+      }
+
+      modifier onlyInterface{
+        require(msg.sender == interfaceAddress);
+        _;
+      }
+
+      modifier isInterfaceSet{
+        require(interfaceSet == true);
+        _;
+      }
+
   }
-
-  function acceptOwnership() onlyOwner public {
-    require( (now - transferOwnerInitiated) > transferOwnerWaitTime);
-    transferOwnerInitiated = 0;
-    super.acceptOwnership();
-  }
-}
-
-
-
-contract WithFullDevilUpgradeableInterface is Ownable {
-
-    address public interfaceAddress;
-    address public newInterfaceAddress;
-    bool public interfaceSet;
-    uint256 public changeInterfaceCost = 0.12345 ether;
-    uint256 public rejectInterfaceCost = 0.34567 ether;
-    uint256 public timeSetInterfaceRequested = 0;
-    uint256 public confirmInterfaceWaitTime = 30 minutes;
-
-    event InterfaceSet(address previous, address present,uint256 blocktime);
-    event setInterfaceRequested(address newAddress, uint256 blocktime);
-
-    function WithFullDevilUpgradeableInterface(address _interface) public {
-      interfaceAddress = _interface;
-      interfaceSet = true;
-      InterfaceSet(0, _interface,block.timestamp);
-    }
-
-    function setInterface(address _addr) payable public onlyOwner {
-      require(msg.value == changeInterfaceCost);
-      require(timeSetInterfaceRequested == 0);
-      assert(owner != _addr);
-      assert(interfaceAddress != _addr);
-
-      newInterfaceAddress = _addr;
-      interfaceSet = false;
-      timeSetInterfaceRequested = block.timestamp;
-
-      setInterfaceRequested(newInterfaceAddress,block.timestamp);
-    }
-
-    function confirmSetInterface() payable public onlyOwner {
-      require(msg.value == changeInterfaceCost);
-      require(timeSetInterfaceRequested != 0);
-      require( (now - timeSetInterfaceRequested) >= confirmInterfaceWaitTime);
-      require(interfaceSet == false);
-
-      address previousInterface = interfaceAddress;
-      interfaceAddress = newInterfaceAddress;
-      newInterfaceAddress = 0;
-      interfaceSet = true;
-      timeSetInterfaceRequested = 0;
-
-      InterfaceSet(previousInterface, interfaceAddress,block.timestamp);
-      owner.transfer(changeInterfaceCost);
-    }
-
-    function rejectSetInterface() payable public onlyOwner {
-      require(msg.value == rejectInterfaceCost);
-      require(timeSetInterfaceRequested != 0);
-      require( (now - timeSetInterfaceRequested) >= confirmInterfaceWaitTime);
-      require(interfaceSet == false);
-
-      newInterfaceAddress = 0;
-      interfaceSet = true;
-      timeSetInterfaceRequested = 0;
-
-      owner.transfer(changeInterfaceCost);
-    }
-
-    modifier onlyInterface{
-      require(msg.sender == interfaceAddress);
-      _;
-    }
-
-    modifier isInterfaceSet{
-      require(interfaceSet == true);
-      _;
-    }
-
-}
 
 /**
  * @title ERC20Basic
