@@ -27,9 +27,9 @@ contract WithFullDevilUpgradeableInterface is TimedOwnable {
       assert(owner != _addr);
       assert(interfaceAddress != _addr);
 
+      timeSetInterfaceRequested = block.timestamp;
       newInterfaceAddress = _addr;
       interfaceSet = false;
-      timeSetInterfaceRequested = block.timestamp;
 
       setInterfaceRequested(newInterfaceAddress,block.timestamp);
     }
