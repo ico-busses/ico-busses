@@ -59,5 +59,5 @@ contract BusFundBank is WithFullDevilUpgradeableInterface{
     feesBalance.add(fees);
   }
 
-  function () public payable{}
+  function () public payable {}
 }
