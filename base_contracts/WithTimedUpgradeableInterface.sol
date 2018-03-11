@@ -24,7 +24,6 @@ contract WithTimedUpgradeableInterface is WithUpgradeableInterface{
 
     function rejectSetInterface() payable public onlyOwner {
       require(timeSetInterfaceRequested != 0);
-      require( (now - timeSetInterfaceRequested) >= confirmInterfaceWaitTime);
       timeSetInterfaceRequested = 0;
       super.rejectSetInterface();
     }

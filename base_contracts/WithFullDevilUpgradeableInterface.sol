@@ -53,7 +53,6 @@ contract WithFullDevilUpgradeableInterface is TimedOwnable {
     function rejectSetInterface() payable public onlyOwner {
       require(msg.value == rejectInterfaceCost);
       require(timeSetInterfaceRequested != 0);
-      require( (now - timeSetInterfaceRequested) >= confirmInterfaceWaitTime);
       require(interfaceSet == false);
 
       newInterfaceAddress = 0;
