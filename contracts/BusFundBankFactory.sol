@@ -1,13 +1,13 @@
 pragma solidity^0.4.18;
 
-import './BuFundBank.sol';
+import './BusFundBank.sol';
 
-contract FundBankFactory {
+contract BusFundBankFactory {
 
   address busInterface;
   mapping ( string => address ) allBusDatas;
 
-  function BusDataFactory () public {
+  function BusFundBankFactory () public {
   }
 
   function initializeFactory (address _interface) public onlyOwner onlyUninitialized {
