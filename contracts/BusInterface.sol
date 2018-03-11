@@ -3,11 +3,18 @@ pragma solidity^0.4.18;
 import './BusFundBank.sol';
 import './BusData.sol';
 
-contract BusInterface is Ownable{
+contract BusInterface is Ownable,GenericCaller{
 
   address public busData;
   address public busFundBank;
   uint256 public minimumStake;
+
+  address[] public busDataFactories;
+  address[] public busFundBankFactories;
+
+  function BusInterface () GenericCaller (msg.sender) public {
+
+  }
 
   function addIcoSale(address _saleAddr, string _name ) public payable isSetMinimumStake {}
 
@@ -15,6 +22,14 @@ contract BusInterface is Ownable{
 
   function setIcoStarted(address _addr) public canUpdateDetails(_addr) {
 
+  }
+
+  function getActiveBusDataFactory () {
+    return busDataFactories[busDataFactories.length];
+  }
+
+  function getActiveBusFundBankFactory () {
+    return busFundBankFactories[busFundBankFactories.length];
   }
 
 
