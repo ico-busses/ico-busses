@@ -27,6 +27,7 @@ contract BusData is WithFullDevilUpgradeableInterface {
   mapping(uint256 => ICO) public icos;
   mapping(address=>uint) public tokensIco;
   mapping(address=>uint) public icoAddressesIco;
+  mapping(address=>address[]) public investorIcos;
 
   function createICO( address _icoAddress, string _name ) public onlyInterface {}
 
@@ -52,6 +53,10 @@ contract BusData is WithFullDevilUpgradeableInterface {
   function getIcoName(uint256 _icoIndex) public view returns (string){
     assert(_icoIndex > 0);
     return icos[ _icoIndex ].name;
+  }
+
+  function getInvestorIcos(address _investor) public view returns (uint) {
+    return investorIcos[_investor].length;
   }
 
   function isIcoAdded(address _ico) public view returns (bool){
