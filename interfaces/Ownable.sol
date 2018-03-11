@@ -14,7 +14,4 @@ contract Ownable {
    * @param _newOwner The address to transfer ownership to.
    */
   function transferOwnership(address _newOwner) public;
-
-  function acceptOwnership() public ;
-
 }
