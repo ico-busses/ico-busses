@@ -1,9 +1,9 @@
+pragma solidity^0.4.18;
+
 import '../libraries/SafeMath.sol';
 import '../base_contracts/TimedOwnable.sol';
 import '../base_contracts/WithFullDevilUpgradeableInterface.sol';
 import {ForeignToken as FERC20} from '../interfaces/ForeignToken.sol';
-
-pragma solidity^0.4.18;
 
 contract BusFundBank is WithFullDevilUpgradeableInterface{
   using SafeMath for uint;

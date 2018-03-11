@@ -1,7 +1,7 @@
+pragma solidity^0.4.18;
+
 import './BusFundBank.sol';
 import './BusData.sol';
-
-pragma solidity^0.4.18;
 
 contract BusInterface is Ownable{
 

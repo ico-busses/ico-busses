@@ -1,6 +1,6 @@
-import './WithTimedUpgradeableInterface.sol';
-
 pragma solidity^0.4.18;
+
+import './WithTimedUpgradeableInterface.sol';
 
 contract WithDevilUpgradeableInterface is WithTimedUpgradeableInterface{
 

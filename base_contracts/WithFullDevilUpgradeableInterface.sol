@@ -1,6 +1,6 @@
-import './TimedOwnable.sol';
-
 pragma solidity^0.4.18;
+
+import './TimedOwnable.sol';
 
 contract WithFullDevilUpgradeableInterface is TimedOwnable {
 
