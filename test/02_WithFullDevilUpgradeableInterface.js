@@ -98,30 +98,29 @@ contract('02_WithFullDevilUpgradeableInterface', function(accounts){
             assert.equal(e,null,'Unable to fetch rejectInterfaceCost');
             _value = r;
 
-            console.log("InterfaceCost: ",Number(_value));
-
-            contract.rejectSetInterface({from:Me,value:_value},function(e,r){
-              assert.equal(e,null,'unable to rejectInterface');
+            contract.rejectSetInterface({from:Me,value:_value },function(e,r){
+              assert.equal(e,null,`unable to rejectInterface by ${Me} with rejectCost ${Number(_value)}`);
               done();
             });
           })
         });
 
-        it.skip('Should send right amount to the contract from lender',function(done){
-          var _lender = contract.lender.call(),
-          _value = contract.getLoanValue.call(true),
-          _mybal = web3.eth.getBalance(Me),
-          txn = {from:_lender,to:contract.address,value: _value, gas: 210000 };
+        it('Should complete ugradeInterface process',function(done){
+          let _value;
+          contract.changeInterfaceCost.call(function(e,r){
+            assert.equal(e,null,'Unable to fetch interface Cost');
+            _value = r;
 
-          web3.eth.sendTransaction(txn,function(e,r){
-            var balance = contract.balanceOf.call(_lender),
-            totalSupply = contract.actualTotalSupply.call();
-            _mynewbal = web3.eth.getBalance(Me);
-            assert.equal(e,null,'Loan not successfully funded by lender');
-            assert.equal(Number(balance),Number(totalSupply),'Wrong number of tokens assigned to lender');
-            assert.equal(Number(_mynewbal),Number(_mybal)+ deployment_config._initialAmount,'Wrong value of Ether sent to Owner');
-            done();
-          });
+            contract.setInterface(newInterface,{from:Me,value:_value},function(e,r){
+              assert.equal(e,null,'unable to initiate setInterface process');
+
+              forceMine(1801);//Move time forward by 30 minutes
+              contract.confirmSetInterface({from:newInterface,value:_value},function(e,r){
+                assert.notEqual(e,null,'seInterface not confirmed by newInterface after waitTime exhausted');
+                done();
+              });
+            });
+          })
         });
     })
 
