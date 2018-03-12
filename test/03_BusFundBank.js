@@ -6,15 +6,14 @@ contract('03_BusFundBank', function(accounts){
     const _1ether = 1e+18;
     Me = accounts[0];
     coFounder = accounts[1];
-    busInterface = accounts[2];
+    busData = accounts[2];
     console.log(accounts);
 
     var deployment_config = {
-      _interface:busInterface
+      _interface:busData
     },
     newBusFundBank = function(){
       return BusFundBank.new(
-          coFounder,
           deployment_config._interface,
           {from:Me}
       );
@@ -36,8 +35,8 @@ contract('03_BusFundBank', function(accounts){
             contract.owner(function(e,r){
               console.log('Owner:', r);
             });
-            contract.interfaceAddress(function(e,r){
-              console.log('interfaceAddress:', r);
+            contract.busData(function(e,r){
+              console.log('Bus Data:', r);
             });
 
             assert.notEqual(contract.address, null, 'Contract not successfully deployed');
@@ -46,10 +45,18 @@ contract('03_BusFundBank', function(accounts){
     });
     describe('EtherTransfer',function(){
 
+        it('Should fail to send funds to the FundBank',function(done){
+            var _value = web3.toWei(1, 'ether');
+            web3.eth.sendTransaction({from:Me,to:contract.address,value:_value},function(e,r){
+              assert.notEqual(e,null,`Illegally sent ${_value/1e+18} Eth to FundBank`);
+                done();
+            });
+        });
+
         it('Should successfully send funds to the FundBank',function(done){
             var _value = web3.toWei(1, 'ether');
             var balance = web3.eth.getBalance(contract.address);
-            web3.eth.sendTransaction({from:Me,to:contract.address,value:_value},function(e,r){
+            contract.fund(0,{from:Me,value:_value},function(e,r){
               assert.equal(e,null,`Unable to send ${_value/1e+18} Eth to FundBank`);
               var newBalance = web3.eth.getBalance(contract.address);
               var balanceChange = newBalance.minus(balance);
@@ -58,19 +65,23 @@ contract('03_BusFundBank', function(accounts){
             });
         });
 
-        it.skip('Should fail to send right amount to the contract from non-lender',function(done){
-          var _value = deployment_config._initialAmount;
-          web3.eth.sendTransaction({from:accounts[2],to:contract.address,value:_value},function(e,r){
-            assert.notEqual(e,null,'Loan funded by non-lender');
+        it('Rogue account should fail to send funds from FundBank',function(done){
+          var _value = web3.toWei(0.5,'ether');
+          contract.sendEther(Me, _value, {from:Me},function(e,r){
+            assert.notEqual(e,null,'Funds sent from FUndBank from Rogue address');
             done();
           });
         });
 
-        it.skip('Should fail to send wrong amount to the contract from lender',function(done){
-          var _value = web3.toWei(2, 'ether'),
-          lender = deployment_config._lender;
-          web3.eth.sendTransaction({from:lender,to:contract.address,value:_value},function(e,r){
-            assert.notEqual(e,null,'Wrong amount used to fund loan');
+        it('Interface should successfully send funds from FundBank',function(done){
+          var _value = web3.toWei(0.5, 'ether');
+          var _balance = web3.eth.getBalance(Me);
+          contract.sendEther(Me, _value, {from:busData},function(e,r){
+            assert.equal(e,null,'Unable to send funds from FundBank');
+
+            var _newbalance = web3.eth.getBalance(Me);
+            var _diff = _newbalance.minus(_balance);
+            assert.equal( _diff.eq(_value),true,`Sent ${_newbalance.minus(_balance).toString()} instead of ${_value.toString()}`);
             done();
           });
         });
