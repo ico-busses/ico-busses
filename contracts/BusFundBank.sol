@@ -7,9 +7,9 @@ import {ForeignToken as FERC20} from '../interfaces/ForeignToken.sol';
 contract BusFundBank is TimedOwnable {
   using SafeMath for uint;
 
-  uint256 feesBalance;
-  address busData;
-  bool resolved;
+  uint256 public feesBalance;
+  address public busData;
+  bool public resolved;
   event EtherTransfer(address indexed to,uint256 amount);
   event TokenTransfer(address token,address indexed to,uint256 amount);
 
