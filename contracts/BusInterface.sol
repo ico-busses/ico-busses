@@ -1,5 +1,6 @@
 pragma solidity^0.4.18;
 
+import '../base_contracts/GenericCaller.sol';
 import './BusFundBank.sol';
 import './BusData.sol';
 
@@ -24,11 +25,11 @@ contract BusInterface is Ownable,GenericCaller{
 
   }
 
-  function getActiveBusDataFactory () {
+  function getActiveBusDataFactory () public view returns (address) {
     return busDataFactories[busDataFactories.length];
   }
 
-  function getActiveBusFundBankFactory () {
+  function getActiveBusFundBankFactory() public view returns (address) {
     return busFundBankFactories[busFundBankFactories.length];
   }
 
