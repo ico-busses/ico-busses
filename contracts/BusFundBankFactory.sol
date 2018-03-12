@@ -1,8 +1,9 @@
 pragma solidity^0.4.18;
 
+import '../base_contracts/Ownable.sol';
 import './BusFundBank.sol';
 
-contract BusFundBankFactory {
+contract BusFundBankFactory is Ownable {
 
   address busInterface;
   mapping ( string => address ) allBusDatas;
