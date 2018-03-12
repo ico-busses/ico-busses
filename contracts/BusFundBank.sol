@@ -37,7 +37,7 @@ contract BusFundBank is TimedOwnable {
 
   function sendTokens(address _token,  address _to,uint256 _value) public onlyInterface {
     require( getTokenBalance(_token) >= _value );
-    doTokenSend(_token,_to,_value);
+    doTokenTransfer(_token,_to,_value);
   }
 
   function sendBatchTokens(address _token, address[20] _addresses, uint256[20] _values ) public onlyInterface {
@@ -63,12 +63,12 @@ contract BusFundBank is TimedOwnable {
   function cleanSweep(address _destination, address _token) public canSweep onlyResolved {
     uint toPay = getTokenBalance(_token);
     require(toPay >= 0);
-    doTokenTransfer(_destination,toPay);
+    doTokenTransfer(_token,_destination,toPay);
   }
 
   function cleanSweep(address _destination) public canSweep onlyResolved{
     require(this.balance >= 0);
-    doEtherTransfer(this.balance,toPay);
+    doEtherTransfer(_destination,this.balance);
   }
 
   function fund(uint256 fees) public payable{
