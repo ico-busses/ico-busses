@@ -77,7 +77,7 @@ contract('03_BusFundBank', function(accounts){
         it('Rogue account should fail to send funds from FundBank',function(done){
           var _value = web3.toWei(0.5,'ether');
           contract.sendEther(Me, _value, {from:Me},function(e,r){
-            assert.notEqual(e,null,'Funds sent from FUndBank from Rogue address');
+            assert.notEqual(e,null,'Funds sent from FundBank from Rogue address');
             done();
           });
         });
@@ -203,7 +203,7 @@ contract('03_BusFundBank', function(accounts){
 
         it('Should fail to withdraw fees balance by non-owner',function(done){
           var accountBalance = web3.eth.getBalance(accounts[5]);
-          var balancetoSend = accountBalance.div(2);
+          var balancetoSend = accountBalance.div(10);
           assert.equal(balancetoSend.gt(0),true,'Fee to be paid is not grater than 0');
 
           contract.fund( balancetoSend, {from:accounts[5], value: balancetoSend}, function(e,r) {
@@ -216,62 +216,73 @@ contract('03_BusFundBank', function(accounts){
           });
         })
 
-        it.skip('Should successfully refund before contract maturation',function(done){
-          deployNewDebtContract()
-          .then(function(inst){
-              newcontract = inst.contract;
-              assert.notEqual(contract.address, null, 'Contract not successfully deployed');
+        it('Should successfully withdraw fees balance from the contract',function(done){
+          var feesBalance = contract.feesBalance.call();
+          var accountBalance = web3.eth.getBalance(coFounder);
+          contract.withdrawFees( coFounder, {from:Me}, function(e,r) {
+            assert.equal(e,null,'Error withdrawing Fees from the contract');
 
-              var _lender = newcontract.lender.call(),
-              _value = newcontract.getLoanValue.call(true),
-              _mybal = web3.eth.getBalance(Me),
-              txn = {from:_lender,to:newcontract.address,value: _value, gas: 210000 };
-
-              web3.eth.sendTransaction(txn,function(e,r){
-
-                var _lender = newcontract.lender.call(),
-                balance = newcontract.balanceOf.call(_lender),
-                totalSupply = newcontract.actualTotalSupply.call();
-                _mynewbal = web3.eth.getBalance(Me);
-
-                assert.equal(e,null,'Loan not successfully funded by lender');
-                assert.equal(Number(balance),Number(totalSupply),'Wrong number of tokens assigned to lender');
-                assert.equal(Number(_mynewbal),Number(_mybal)+ deployment_config._initialAmount,'Wrong value of Ether sent to Owner');
-
-                      var _value = newcontract.getLoanValue.call(false),//fetch the initial loan value
-                      _lender = newcontract.lender.call(),
-                      _lenderBalance = web3.eth.getBalance(_lender);
-                      console.log('Loan term over:', newcontract.isTermOver.call() );
-
-                      web3.eth.sendTransaction({from:Me,to:newcontract.address,value:_value},function(e,r){
-
-                        var balance = newcontract.balanceOf.call(Me),
-                        totalSupply = newcontract.actualTotalSupply.call();
-                        _debtownernewbal = web3.eth.getBalance(_lender);
-                        assert.equal(e,null,'Loan not successfully refunded by Owner');
-                        assert.equal(Number(balance),Number(totalSupply),'Wrong number of tokens refunded to Owner');
-                        assert.equal(Number(_debtownernewbal),Number(_lenderBalance)+ Number(_value),'Wrong value of Ether sent to lender');
-                        done();
-                      });
-              });
-          });
+            var newbalance = web3.eth.getBalance(coFounder);
+            assert.equal(accountBalance.add(feesBalance).toNumber(), newbalance.toNumber(), `${newbalance.sub(accountBalance).toNumber()} sent instead of ${feesBalance.toNumber()}`)
+            done();
+          })
         });
+    })
 
-        it.skip('Should confirm loanValue does not increase after refundLoan',function(done){
-          var time = deployment_config._loanCycle*2*deployment_config._dayLength*1000;
-          forceMine(time);
+    describe('Resolve and Clean Sweep', function() {
+      it('Should fail to resolve FundBank from Rogue Address', function(done) {
+        var resolved = contract.resolved.call();
+        assert.equal(resolved,false,'FundBank previously resolved');
+        contract.setResolved( {from:Me}, function(e,r) {
+          assert.notEqual(e,null,'Rogue acccount successfully resolved contract');
+          done();
+        });
+      })
 
-          totalSupply = contract.totalSupply.call(),
-          actualTotalSupply = contract.actualTotalSupply.call();
+      it('Should successfully resolve FundBank', function(done) {
+        var resolved = contract.resolved.call();
+        assert.equal(resolved,false,'FundBank previously resolved');
+        contract.setResolved( {from:busData}, function(e,r) {
+          assert.equal(e,null,'FundBank not successfully resolved');
+          var resolved = contract.resolved.call();
+          assert.equal(resolved,true,'FundBank not successfully resolved');
+          done();
+        });
+      })
 
-          newtotalSupply = newcontract.totalSupply.call(),
-          newactualTotalSupply = newcontract.actualTotalSupply.call();
-
-          assert.equal( Number(totalSupply), Number(actualTotalSupply), 'Loan increased from '+totalSupply+' to '+actualTotalSupply+' after loan was repaid');
-          assert.equal( Number(newtotalSupply), Number(newactualTotalSupply), 'New Loan increased from '+newtotalSupply+' to '+newactualTotalSupply+' after loan was repaid');
+      it('Should fail to cleanSweep from Rogue Account',function(done){
+        contract.cleanSweep['address']( coFounder, {from:accounts[6]}, function(e,r) {
+          assert.notEqual(e,null,'Rogue Account successfully cleanSweep-ed');
           done();
         })
+      });
 
+      it('Should successfully cleanSweep FunBank ',function(done){
+        var accountBalance = web3.eth.getBalance(Me);
+        var fundBankBalance = web3.eth.getBalance(contract.address);
+        contract.cleanSweep['address']( Me, {from:busData}, function(e,r) {
+          assert.equal(e,null,'Failed to successfully cleanSweep');
+
+          var newaccountBalance = web3.eth.getBalance(Me);
+          assert.equal(accountBalance.add(fundBankBalance).toNumber(),newaccountBalance.toNumber(),'Failed to successfully cleanSweep FundBank balance');
+          done();
+        })
+      });
+
+      it.skip('Should confirm loanValue does not increase after refundLoan',function(done){
+        var time = deployment_config._loanCycle*2*deployment_config._dayLength*1000;
+        forceMine(time);
+
+        totalSupply = contract.totalSupply.call(),
+        actualTotalSupply = contract.actualTotalSupply.call();
+
+        newtotalSupply = newcontract.totalSupply.call(),
+        newactualTotalSupply = newcontract.actualTotalSupply.call();
+
+        assert.equal( Number(totalSupply), Number(actualTotalSupply), 'Loan increased from '+totalSupply+' to '+actualTotalSupply+' after loan was repaid');
+        assert.equal( Number(newtotalSupply), Number(newactualTotalSupply), 'New Loan increased from '+newtotalSupply+' to '+newactualTotalSupply+' after loan was repaid');
+        done();
+      })
     })
 
   });
