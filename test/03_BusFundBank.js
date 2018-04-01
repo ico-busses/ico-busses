@@ -3,7 +3,7 @@ var DummyToken = artifacts.require('./DummyToken.sol');// Import contract of Sta
 
 contract('03_BusFundBank', function(accounts){
 
-    var contract,newcontract,web3,Me;
+    var contract,newcontract,web3,Me,token;
     const _1ether = 1e+18;
     Me = accounts[0];
     coFounder = accounts[1];
@@ -97,7 +97,6 @@ contract('03_BusFundBank', function(accounts){
     })
 
     describe('TokenTransfer',function(){
-        var token;
         it("Should create dummy token", function (done){
           newToken()
           .then(function(inst){
@@ -257,32 +256,37 @@ contract('03_BusFundBank', function(accounts){
         })
       });
 
-      it('Should successfully cleanSweep FunBank ',function(done){
+      it('Should successfully cleanSweep FundBank ',function(done){
         var accountBalance = web3.eth.getBalance(Me);
         var fundBankBalance = web3.eth.getBalance(contract.address);
         contract.cleanSweep['address']( Me, {from:busData}, function(e,r) {
           assert.equal(e,null,'Failed to successfully cleanSweep');
 
           var newaccountBalance = web3.eth.getBalance(Me);
-          assert.equal(accountBalance.add(fundBankBalance).toNumber(),newaccountBalance.toNumber(),'Failed to successfully cleanSweep FundBank balance');
+          assert.equal(accountBalance.add(fundBankBalance).toNumber(),newaccountBalance.toNumber(), `Sent ${newaccountBalance.sub(accountBalance).toNumber()} from FundBank instead of ${fundBankBalance.toNumber()}`);
           done();
         })
       });
 
-      it.skip('Should confirm loanValue does not increase after refundLoan',function(done){
-        var time = deployment_config._loanCycle*2*deployment_config._dayLength*1000;
-        forceMine(time);
+      it('Should fail to cleanSweep FundBank tokens from Rogue Account',function(done){
+        contract.cleanSweep['address,address']( Me, token.address, {from:coFounder}, function(e,r) {
+          assert.notEqual(e,null,'Failed to successfully cleanSweep');
+          done();
+        })
+      });
 
-        totalSupply = contract.totalSupply.call(),
-        actualTotalSupply = contract.actualTotalSupply.call();
+      it('Should successfully cleanSweep FundBank tokens',function(done){
+        var _fundBankbalance = contract.getTokenBalance.call(token.address);
+        var _myBalance = token.balanceOf.call(Me);
+        assert.equal(_fundBankbalance.toNumber() > 0, true, 'Contract\'s Token balance is equal to or less than 0')
+        contract.cleanSweep['address,address']( Me, token.address, {from:Me}, function(e,r) {
+          assert.equal(e,null,'Failed to successfully cleanSweep');
 
-        newtotalSupply = newcontract.totalSupply.call(),
-        newactualTotalSupply = newcontract.actualTotalSupply.call();
-
-        assert.equal( Number(totalSupply), Number(actualTotalSupply), 'Loan increased from '+totalSupply+' to '+actualTotalSupply+' after loan was repaid');
-        assert.equal( Number(newtotalSupply), Number(newactualTotalSupply), 'New Loan increased from '+newtotalSupply+' to '+newactualTotalSupply+' after loan was repaid');
-        done();
-      })
+          var _myNewBalance = token.balanceOf.call(Me);
+          assert.equal(_myBalance.add(_fundBankbalance).toNumber(),_myNewBalance.toNumber(), `Sent ${_myNewBalance.sub(_myBalance).toNumber()} from FundBank instead of ${_fundBankbalance.toNumber()}`);
+          done();
+        })
+      });
     })
 
   });
