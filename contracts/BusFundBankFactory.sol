@@ -1,22 +1,28 @@
 pragma solidity^0.4.18;
 
 import '../base_contracts/Ownable.sol';
+import '../base_contracts/GenericCaller.sol';
 import './BusFundBank.sol';
 
-contract BusFundBankFactory is Ownable {
+contract BusFundBankFactory is Ownable,GenericCaller {
 
-  address busInterface;
+  address public busInterface;
   mapping ( string => address ) allBusDatas;
 
-  function BusFundBankFactory () public {
+  function BusFundBankFactory () GenericCaller(0x0) public {
   }
 
   function initializeFactory (address _interface) public onlyOwner onlyUninitialized {
     busInterface = _interface;
+    genericCallAdmin = _interface;
   }
 
-  function spawnFundBank () public onlyInterface {
+  function spawnFundBank (address _busData, string _busName) public onlyInterface {
+    require(_busData != 0x0);
+    require(bytes(_busName).length > 0);
 
+    address _fundBank = new BusFundBank(_busData);
+    allBusDatas[_busName] = _fundBank;
   }
 
   modifier onlyInterface {
