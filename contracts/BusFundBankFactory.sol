@@ -7,7 +7,10 @@ import './BusFundBank.sol';
 contract BusFundBankFactory is Ownable,GenericCaller {
 
   address public busInterface;
-  mapping ( string => address ) allBusDatas;
+  address[] allBusFunds;
+  mapping ( string => address ) allBusFundNames;
+
+  event BusFundBankCreated( address BusFundBank, string Name );
 
   function BusFundBankFactory () GenericCaller(0x0) public {
   }
@@ -17,12 +20,20 @@ contract BusFundBankFactory is Ownable,GenericCaller {
     genericCallAdmin = _interface;
   }
 
-  function spawnFundBank (address _busData, string _busName) public onlyInterface {
+  function spawnFundBank (address _busData, string _busName) public onlyInterface returns (address) {
     require(_busData != 0x0);
     require(bytes(_busName).length > 0);
 
     address _fundBank = new BusFundBank(_busData);
-    allBusDatas[_busName] = _fundBank;
+    allBusFundNames[_busName] = _fundBank;
+    allBusFunds.push(_fundBank);
+    BusFundBankCreated(_fundBank, _busName);
+
+    return _fundBank;
+  }
+
+  function countAllCreated() public view returns (uint256) {
+    return allBusFunds.length;
   }
 
   modifier onlyInterface {
