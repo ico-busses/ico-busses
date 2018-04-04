@@ -7,7 +7,7 @@ import './BusFundBank.sol';
 contract BusFundBankFactory is Ownable,GenericCaller {
 
   address public busInterface;
-  address[] allBusFunds;
+  address[] public allBusFunds;
   mapping ( string => address ) allBusFundNames;
 
   event BusFundBankCreated( address BusFundBank, string Name );
@@ -30,6 +30,10 @@ contract BusFundBankFactory is Ownable,GenericCaller {
     BusFundBankCreated(_fundBank, _busName);
 
     return _fundBank;
+  }
+
+  function getFundBankAddress(string _busName) public view returns (address) {
+    return allBusFundNames[_busName];
   }
 
   function countAllCreated() public view returns (uint256) {
