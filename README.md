@@ -14,6 +14,7 @@ Details of the most recent deployed stable contracts on the networks
 
 ### Ropsten
 
-|s/n| Contract | Address | Deploment cost |
+|s/n| Contract | Address | Deployment cost | Factory Deployment Cost |
 |-|---|---| --- |---|
-|- | BusFundBank | [0xadb86a7eab8f681f9a695c96b421c3cbe62be119](https://ropsten.etherscan.io/address/0xadb86a7eab8f681f9a695c96b421c3cbe62be119) | 2090052 |
+|- | BusFundBank | [0xccc664f67aef9c4d11779d65577184821d419ce1](https://ropsten.etherscan.io/address/0xccc664f67aef9c4d11779d65577184821d419ce1) | 2090052 | 1237999 |
+|- | BusFundBankFactory | [0xdd34c7dc96fab5323451ac05d8f2e1f81d9ad905](https://ropsten.etherscan.io/address/0xdd34c7dc96fab5323451ac05d8f2e1f81d9ad905) | 2324444 | - |
