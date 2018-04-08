@@ -3,7 +3,7 @@ var DummyToken = artifacts.require('./DummyToken.sol');// Import contract of Sta
 
 contract('04_BusFundBankFactory:: ', function(accounts){
 
-    var contract,newcontract,web3,Me,token;
+    var contract,newcontract,web3,Me,token,snapshot;
     const _1ether = 1e+18;
     Me = accounts[0];
     coFounder = accounts[1];
@@ -32,11 +32,20 @@ contract('04_BusFundBankFactory:: ', function(accounts){
       web3.currentProvider.send({jsonrpc: "2.0", method: "evm_mine", params: [], id: 0})
     }
 
+    function snapShot () {
+      snapshot = web3.currentProvider.send({jsonrpc: "2.0", method: "evm_snapshot", params: [], id: 123}).result;
+    }
+
+    after (function() {
+      web3.currentProvider.send({jsonrpc: "2.0", method: "evm_revert", params: [snapshot]})
+    })
+
     it('should deploy the contract', function (done) {
         newBusFundBankFactory()
         .then(function(inst){
             contract = inst.contract;
             web3 = inst.constructor.web3;
+            snapShot();
 
             console.log('New Factory:',contract.address );
 

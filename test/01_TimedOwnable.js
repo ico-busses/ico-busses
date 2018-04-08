@@ -24,12 +24,20 @@ contract('01_TimedOwnable', function(accounts){
       web3.currentProvider.send({jsonrpc: "2.0", method: "evm_mine", params: [], id: 0})
     }
 
+    function snapShot () {
+      snapshot = web3.currentProvider.send({jsonrpc: "2.0", method: "evm_snapshot", params: [], id: 123}).result;
+    }
+
+    after (function() {
+      web3.currentProvider.send({jsonrpc: "2.0", method: "evm_revert", params: [snapshot]})
+    })
+
     it('should deploy the contract', function (done) {
         newTimedOwnable()
         .then(function(inst){
             contract = inst.contract;
             web3 = inst.constructor.web3;
-
+            snapShot();
 
             console.log('Address:',contract.address );
             contract.owner(function(e,r){
