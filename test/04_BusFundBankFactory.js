@@ -1,3 +1,4 @@
+var BusFundBank = artifacts.require('./BusFundBank.sol');// Import contract of StandarTOken type
 var BusFundBankFactory = artifacts.require('./BusFundBankFactory.sol');// Import contract of StandarTOken type
 var DummyToken = artifacts.require('./DummyToken.sol');// Import contract of StandarTOken type
 
@@ -68,7 +69,6 @@ contract('04_BusFundBankFactory:: ', function(accounts){
       it('Should successfully initializeFactory', function (done) {
         var _interface = contract.busInterface.call();
         assert.equal(Number(_interface), 0, `FundBankFactory already initialized`);
-
         contract.initializeFactory(busInterface, { from: Me }, function (e, r) {
           assert.equal(e, null, `Failed to initialize FundBankFactory`);
           var _interface = contract.busInterface.call();
@@ -90,23 +90,33 @@ contract('04_BusFundBankFactory:: ', function(accounts){
       var _busName = 'Test Name';
 
       it('Should fail to spawnFundBank from Rogue account',function(done){
-        contract.spawnFundBank( _busData, _busName, { from: accounts[5] }, function (e, r) {
-          assert.notEqual(e, null,`Illegally initialized FundBankFactory`);
+        contract.spawnFundBank( _busData, _busName, { from: Me }, function (e, r) {
+          assert.notEqual(e, null,`Illegally spawned new FundBank`);
           done();
         });
       });
 
       it('Should fail to spawnFundBank with invalid info',function(done){
-        contract.spawnFundBank( 0, _busName, { from: Me }, function (e, r) {
-          assert.notEqual(e, null,`Illegally initialized FundBankFactory`);
-          done();
+        assert.equal( contract.busInterface.call(), busInterface, 'Wrong interface detected from FundBankFactory');
+        contract.spawnFundBank( 0, _busName, { from: busInterface }, function (e, r) {
+          assert.notEqual(e, null,`Illegally spawned new FundBank`);
+          contract.spawnFundBank( _busData, '', { from: busInterface }, function (e, r) {
+            assert.notEqual(e, null,`Illegally spawned new FundBank`);
+            done();
+          });
         });
       });
 
-      it.skip('Should successfully spawnFundBank',function(){
-        contract.spawnFundBank( _busData, _busName, { from: Me }, function (e, r) {
+      it('Should successfully spawnFundBank',function(done){
+        assert.equal( contract.busInterface.call(), busInterface, 'Wrong interface detected from FundBankFactory');
+        contract.spawnFundBank( _busData, _busName, { from: busInterface }, function (e, r) {
           assert.equal(e,null, 'Failed to spawnFundBank');
-          var _balance = contract.getTokenBalance.call(token.address);
+          var newAddress = contract.getFundBankAddress.call(_busName);
+          assert.notEqual(newAddress,null, 'Failed to retrieve new FundBank address');
+          assert.equal(web3.isAddress(newAddress),true, `invalid address: ${newAddress} set as new FundBank address`);
+          var newBusData = BusFundBank.at(newAddress).busData.call();
+          assert.equal(_busData, newBusData, `new BusFundBank busData: ${newBusData} set as new FundBank busData instead of ${newBusData}`);
+          done();
         })
       });
     })
