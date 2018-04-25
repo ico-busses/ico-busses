@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 
 /**
@@ -6,29 +6,29 @@ pragma solidity ^0.4.18;
 * @dev Math operations with safety checks that throw on error
 */
 library SafeMath {
-function mul(uint256 a, uint256 b) internal constant returns (uint256) {
-  uint256 c = a * b;
-  assert(a == 0 || c / a == b);
-  return c;
-}
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a * b;
+    assert(a == 0 || c / a == b);
+    return c;
+  }
 
-function div(uint256 a, uint256 b) internal constant returns (uint256) {
-  // assert(b > 0); // Solidity automatically throws when dividing by 0
-  uint256 c = a / b;
-  // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-  return c;
-}
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // assert(b > 0); // Solidity automatically throws when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+    return c;
+  }
 
-function sub(uint256 a, uint256 b) internal constant returns (uint256) {
-  assert(b <= a);
-  return a - b;
-}
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    assert(b <= a);
+    return a - b;
+  }
 
-function add(uint256 a, uint256 b) internal constant returns (uint256) {
-  uint256 c = a + b;
-  assert(c >= a);
-  return c;
-}
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    assert(c >= a);
+    return c;
+  }
 }
 
 
@@ -38,35 +38,35 @@ function add(uint256 a, uint256 b) internal constant returns (uint256) {
 * functions, this simplifies the implementation of "user permissions".
 */
 contract Ownable {
-address public owner;
+  address public owner;
 
-event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-/**
- * @dev The Ownable constructor sets the original `owner` of the contract to the sender
- * account.
- */
-function Ownable() public {
-  owner = msg.sender;
-}
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * account.
+   */
+  function Ownable() public {
+    owner = msg.sender;
+  }
 
-/**
- * @dev Throws if called by any account other than the owner.
- */
-modifier onlyOwner() {
-  require(msg.sender == owner);
-  _;
-}
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
+  }
 
-/**
- * @dev Allows the current owner to transfer control of the contract to a newOwner.
- * @param newOwner The address to transfer ownership to.
- */
-function transferOwnership(address newOwner) internal {
-  require(newOwner != address(0));
-  OwnershipTransferred(owner, newOwner);
-  owner = newOwner;
-}
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address newOwner) internal {
+    require(newOwner != address(0));
+    emit OwnershipTransferred(owner, newOwner);
+    owner = newOwner;
+  }
 }
 
 contract TimedOwnable is Ownable{
@@ -75,7 +75,7 @@ contract TimedOwnable is Ownable{
   address public coFounder;
   uint256 public transferOwnerInitiated = 0;
   uint256 public transferOwnerWaitTime = 30 minutes;
-  event transferOwnershipRequested( address newOwner, uint256 timestamp);
+  event TransferOwnershipRequested( address newOwner, uint256 timestamp);
 
   function TimedOwnable(address _coFounder) public {
     require(_coFounder != 0x0);
@@ -85,7 +85,7 @@ contract TimedOwnable is Ownable{
   function initiateTransferOwnership(address _newOwner) onlyOwner public {
     require(transferOwnerInitiated == 0);
     transferOwnerInitiated = block.timestamp;
-    transferOwnershipRequested( newOwner, transferOwnerInitiated);
+    emit TransferOwnershipRequested( newOwner, transferOwnerInitiated);
     newOwner = _newOwner;
   }
 
@@ -105,13 +105,13 @@ contract TimedOwnable is Ownable{
     require(coFounder == msg.sender);
     require(transferOwnerInitiated > 0);
     transferOwnerInitiated = 0;
-    OwnershipTransferred(owner, newOwner);
+    emit OwnershipTransferred(owner, newOwner);
     owner = newOwner;
   }
 }
 
 contract ForeignToken {
-    function balanceOf(address _owner) public constant returns (uint256);
+    function balanceOf(address _owner) public view returns (uint256);
     function transfer(address _to, uint256 _value) public returns (bool);
 }
 
@@ -129,8 +129,8 @@ contract BusFundBank is TimedOwnable {
     busData = _interface;
   }
 
-  function getTokenBalance( address _token) public constant returns(uint256){
-    return FERC20(_token).balanceOf(this);
+  function getTokenBalance( address _token) public view returns(uint256){
+    return FERC20(_token).balanceOf(address(this));
   }
 
   function setResolved () public onlyInterface {
@@ -138,12 +138,12 @@ contract BusFundBank is TimedOwnable {
   }
 
   function doTokenTransfer(address _token,  address _to,uint256 _value) internal {
-    TokenTransfer(_token,_to,_value);
+    emit TokenTransfer(_token,_to,_value);
     FERC20(_token).transfer(_to,_value);
   }
 
   function doEtherTransfer(address _to,uint256 _value) internal {
-    EtherTransfer(_to,_value);
+    emit EtherTransfer(_to,_value);
     _to.transfer(_value);
   }
 
@@ -166,7 +166,7 @@ contract BusFundBank is TimedOwnable {
   }
 
   function withdrawFees(address _destination) public onlyOwner {
-    require(this.balance >= feesBalance);
+    require(address(this).balance >= feesBalance);
     uint256 toPay = feesBalance;
     feesBalance = 0;
     doEtherTransfer(_destination,toPay);
@@ -179,8 +179,8 @@ contract BusFundBank is TimedOwnable {
   }
 
   function cleanSweep(address _destination) public canSweep onlyResolved{
-    require(this.balance >= 0);
-    doEtherTransfer(_destination,this.balance);
+    require(address(this).balance >= 0);
+    doEtherTransfer(_destination,address(this).balance);
   }
 
   function fund(uint256 fees) public payable{

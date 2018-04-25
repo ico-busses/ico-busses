@@ -1,4 +1,4 @@
-pragma solidity^0.4.18;
+pragma solidity^0.4.21;
 
 import './Ownable.sol';
 
@@ -8,7 +8,7 @@ contract TimedOwnable is Ownable{
   address public coFounder;
   uint256 public transferOwnerInitiated = 0;
   uint256 public transferOwnerWaitTime = 30 minutes;
-  event transferOwnershipRequested( address newOwner, uint256 timestamp);
+  event TransferOwnershipRequested( address newOwner, uint256 timestamp);
 
   function TimedOwnable(address _coFounder) public {
     require(_coFounder != 0x0);
@@ -18,7 +18,7 @@ contract TimedOwnable is Ownable{
   function initiateTransferOwnership(address _newOwner) onlyOwner public {
     require(transferOwnerInitiated == 0);
     transferOwnerInitiated = block.timestamp;
-    transferOwnershipRequested( newOwner, transferOwnerInitiated);
+    emit TransferOwnershipRequested( newOwner, transferOwnerInitiated);
     newOwner = _newOwner;
   }
 
@@ -38,7 +38,7 @@ contract TimedOwnable is Ownable{
     require(coFounder == msg.sender);
     require(transferOwnerInitiated > 0);
     transferOwnerInitiated = 0;
-    OwnershipTransferred(owner, newOwner);
+    emit OwnershipTransferred(owner, newOwner);
     owner = newOwner;
   }
 }

@@ -1,4 +1,4 @@
-pragma solidity^0.4.18;
+pragma solidity^0.4.21;
 
 import './TimedOwnable.sol';
 
@@ -13,12 +13,12 @@ contract WithFullDevilUpgradeableInterface is TimedOwnable {
     uint256 public confirmInterfaceWaitTime = 30 minutes;
 
     event InterfaceSet(address previous, address present,uint256 blocktime);
-    event setInterfaceRequested(address newAddress, uint256 blocktime);
+    event SetInterfaceRequested(address newAddress, uint256 blocktime);
 
     function WithFullDevilUpgradeableInterface(address _coFounder,address _interface) TimedOwnable(_coFounder) public {
       interfaceAddress = _interface;
       interfaceSet = true;
-      InterfaceSet(0, _interface,block.timestamp);
+      emit InterfaceSet(0, _interface,block.timestamp);
     }
 
     function setInterface(address _addr) payable public onlyOwner {
@@ -31,7 +31,7 @@ contract WithFullDevilUpgradeableInterface is TimedOwnable {
       newInterfaceAddress = _addr;
       interfaceSet = false;
 
-      setInterfaceRequested(newInterfaceAddress,block.timestamp);
+      emit SetInterfaceRequested(newInterfaceAddress,block.timestamp);
     }
 
     function confirmSetInterface() payable public onlyOwner {
@@ -46,7 +46,7 @@ contract WithFullDevilUpgradeableInterface is TimedOwnable {
       interfaceSet = true;
       timeSetInterfaceRequested = 0;
 
-      InterfaceSet(previousInterface, interfaceAddress,block.timestamp);
+      emit InterfaceSet(previousInterface, interfaceAddress,block.timestamp);
       owner.transfer(changeInterfaceCost);
     }
 

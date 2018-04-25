@@ -1,4 +1,4 @@
-pragma solidity^0.4.18;
+pragma solidity^0.4.21;
 
 import './Ownable.sol';
 
@@ -9,12 +9,12 @@ contract WithUpgradeableInterface is Ownable{
     bool public interfaceSet;
 
     event InterfaceSet(address previous, address present,uint256 blocktime);
-    event setInterfaceRequested(address newAddress, uint256 blocktime);
+    event SetInterfaceRequested(address newAddress, uint256 blocktime);
 
     function WithUpgradeableInterface(address _interface) public {
       interfaceAddress = _interface;
       interfaceSet = true;
-      InterfaceSet(0, _interface,block.timestamp);
+      emit InterfaceSet(0, _interface,block.timestamp);
     }
 
     function setInterface(address _addr) payable public onlyOwner {
@@ -22,7 +22,7 @@ contract WithUpgradeableInterface is Ownable{
       assert(interfaceAddress != _addr);
       newInterfaceAddress = _addr;
       interfaceSet = false;
-      setInterfaceRequested(newInterfaceAddress,block.timestamp);
+      emit SetInterfaceRequested(newInterfaceAddress,block.timestamp);
     }
 
     function confirmSetInterface() payable public onlyOwner {
@@ -31,7 +31,7 @@ contract WithUpgradeableInterface is Ownable{
       interfaceAddress = newInterfaceAddress;
       newInterfaceAddress = 0;
       interfaceSet = true;
-      InterfaceSet(previousInterface, interfaceAddress,block.timestamp);
+      emit InterfaceSet(previousInterface, interfaceAddress,block.timestamp);
     }
 
     function rejectSetInterface() payable public onlyOwner {

@@ -1,4 +1,4 @@
-pragma solidity^0.4.18;
+pragma solidity^0.4.21;
 
 import '../base_contracts/Ownable.sol';
 import '../base_contracts/GenericCaller.sol';
@@ -27,7 +27,7 @@ contract BusFundBankFactory is Ownable,GenericCaller {
     address _fundBank = new BusFundBank(_busData);
     allBusFundNames[_busName] = _fundBank;
     allBusFunds.push(_fundBank);
-    BusFundBankCreated(_fundBank, _busName);
+    emit BusFundBankCreated(_fundBank, _busName);
 
     return _fundBank;
   }

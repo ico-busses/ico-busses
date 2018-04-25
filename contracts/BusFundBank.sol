@@ -1,4 +1,4 @@
-pragma solidity^0.4.18;
+pragma solidity^0.4.21;
 
 import '../libraries/SafeMath.sol';
 import '../base_contracts/TimedOwnable.sol';
@@ -17,8 +17,8 @@ contract BusFundBank is TimedOwnable {
     busData = _interface;
   }
 
-  function getTokenBalance( address _token) public constant returns(uint256){
-    return FERC20(_token).balanceOf(this);
+  function getTokenBalance( address _token) public view returns(uint256){
+    return FERC20(_token).balanceOf(address(this));
   }
 
   function setResolved () public onlyInterface {
@@ -26,12 +26,12 @@ contract BusFundBank is TimedOwnable {
   }
 
   function doTokenTransfer(address _token,  address _to,uint256 _value) internal {
-    TokenTransfer(_token,_to,_value);
+    emit TokenTransfer(_token,_to,_value);
     FERC20(_token).transfer(_to,_value);
   }
 
   function doEtherTransfer(address _to,uint256 _value) internal {
-    EtherTransfer(_to,_value);
+    emit EtherTransfer(_to,_value);
     _to.transfer(_value);
   }
 
@@ -54,7 +54,7 @@ contract BusFundBank is TimedOwnable {
   }
 
   function withdrawFees(address _destination) public onlyOwner {
-    require(this.balance >= feesBalance);
+    require(address(this).balance >= feesBalance);
     uint256 toPay = feesBalance;
     feesBalance = 0;
     doEtherTransfer(_destination,toPay);
@@ -67,8 +67,8 @@ contract BusFundBank is TimedOwnable {
   }
 
   function cleanSweep(address _destination) public canSweep onlyResolved{
-    require(this.balance >= 0);
-    doEtherTransfer(_destination,this.balance);
+    require(address(this).balance >= 0);
+    doEtherTransfer(_destination,address(this).balance);
   }
 
   function fund(uint256 fees) public payable{
