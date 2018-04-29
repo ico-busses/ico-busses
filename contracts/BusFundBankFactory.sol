@@ -23,6 +23,7 @@ contract BusFundBankFactory is Ownable,GenericCaller {
   function spawnFundBank (address _busData, string _busName) public onlyInterface returns (address) {
     require(_busData != 0x0);
     require(bytes(_busName).length > 0);
+    require(allBusFundNames[_busName] == 0x0);
 
     address _fundBank = new BusFundBank(_busData);
     allBusFundNames[_busName] = _fundBank;
